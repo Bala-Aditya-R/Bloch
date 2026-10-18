@@ -1,6 +1,4 @@
-// Interactive Bloch Sphere Simulator
-// C++17 + raylib 6.x | Windows / MSYS2 UCRT64
-// Build: g++ main.cpp -o bloch.exe -std=c++17 -lraylib -lopengl32 -lgdi32 -lwinmm
+// Interactive Bloch Sphere Simulator IBSS ... ... ... Not a professional... idk how my code works...
 
 #include "raylib.h"
 
@@ -43,7 +41,6 @@ const char* gateName(Gate gate) {
     return "?";
 }
 
-// These are the exact single-qubit unitary gates, including their phases.
 Qubit applyGate(const Qubit& q, Gate gate) {
     const Complex i{0.0, 1.0};
     switch (gate) {
@@ -58,9 +55,7 @@ Qubit applyGate(const Qubit& q, Gate gate) {
     return q;
 }
 
-// Continuous gate animation: exp(i*a/2) [cos(a/2) I - i sin(a/2) G].
-// At a=pi this equals G, so both Bloch position AND displayed amplitudes
-// smoothly reach the exact Hadamard/Pauli-gate result (no phase jump).
+//wow... people read this stuff...
 Qubit gateAtAngle(const Qubit& start, Gate gate, double angle) {
     const Qubit after = applyGate(start, gate);
     const Complex i{0.0, 1.0};
@@ -79,7 +74,7 @@ Bloch toBloch(const Qubit& q) {
             std::norm(q.alpha) - std::norm(q.beta)};
 }
 
-// Bloch Z is vertical. raylib's vertical coordinate is world Y.
+
 Vector3 world(Bloch v) {
     return {static_cast<float>(v.x), static_cast<float>(v.z),
             static_cast<float>(v.y)};
@@ -110,7 +105,7 @@ void drawBlochGrid() {
         }
     }
 
-    // Meridians every 30 degrees of azimuth.
+
     for (int m = 0; m < 12; ++m) {
         const double phi = 2.0 * kPi * m / 12.0;
         for (int j = 0; j < segments / 2; ++j) {
@@ -129,7 +124,7 @@ void drawAxes() {
     DrawLine3D(world({0, -1.32, 0}), world({0, 1.32, 0}), yColor);
     DrawLine3D(world({0, 0, -1.32}), world({0, 0, 1.32}), zColor);
 
-    // Small spheres make the positive ends distinguishable.
+    
     DrawSphere(world({1.32, 0, 0}), 0.020f, xColor);
     DrawSphere(world({0, 1.32, 0}), 0.020f, yColor);
     DrawSphere(world({0, 0, 1.32}), 0.020f, zColor);
@@ -183,14 +178,14 @@ double nearZero(double x) {
     return std::abs(x) < 1e-9 ? 0.0 : x;
 }
 
-}  // namespace
+}  
 
 int main() {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(kWindowW, kWindowH, "Bloch Sphere | Quantum Gate Simulator");
     SetTargetFPS(60);
 
-    // Use a smooth Windows font when available; raylib's default is a pixel font.
+
     Font font = GetFontDefault();
     bool customFont = false;
     if (FileExists("C:/Windows/Fonts/segoeui.ttf")) {
@@ -222,7 +217,7 @@ int main() {
         const float dt = std::min(GetFrameTime(), 0.08f);
         const Vector2 mouse = GetMousePosition();
 
-        // Camera movement only inside the sphere region (not the control panel).
+        // Camera movement was a pain...😭
         if (mouse.x < kPanelX) {
             if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
                 const Vector2 delta = GetMouseDelta();
@@ -234,7 +229,7 @@ int main() {
         }
         pitch = std::clamp(pitch, -1.35f, 1.35f);
 
-        // Fix the sphere visually in the left part of the window while orbiting.
+    
         const Vector3 orbit = {
             cameraDistance * std::cos(pitch) * std::sin(yaw),
             cameraDistance * std::sin(pitch),
@@ -249,8 +244,7 @@ int main() {
         camera.fovy = 45.0f;
         camera.projection = CAMERA_PERSPECTIVE;
 
-        // Collect gate clicks / keyboard shortcuts into a queue.
-        // A queued gate starts only after the preceding animation finishes.
+ 
         const Gate gateIds[] = {Gate::H, Gate::X, Gate::Y, Gate::Z};
         const int keys[] = {KEY_H, KEY_X, KEY_Y, KEY_Z};
         for (int j = 0; j < 4; ++j) {
@@ -281,7 +275,7 @@ int main() {
             }
         }
 
-        // Start the next gate and compute the correct gate result.
+        
         if (!animating && !pending.empty()) {
             activeGate = pending.front();
             pending.pop_front();
@@ -291,7 +285,7 @@ int main() {
             animating = true;
         }
 
-        // Animation updates both the displayed amplitudes and the Bloch arrow.
+    
         if (animating) {
             elapsed += dt;
             const double t = std::clamp(static_cast<double>(elapsed / kGateSeconds),
@@ -324,7 +318,7 @@ int main() {
         BeginDrawing();
         ClearBackground(background);
 
-        // 3D Bloch sphere with genuine latitude and longitude circles.
+
         BeginMode3D(camera);
         drawBlochGrid();
         drawAxes();
@@ -332,7 +326,7 @@ int main() {
         drawStateArrow(position);
         EndMode3D();
 
-        // World-space labels follow the sphere as the camera rotates.
+
         struct Label { const char* name; Bloch pos; Color color; };
         const Label labels[] = {
             {"|0>", {0, 0, 1.10}, blue},
@@ -354,7 +348,7 @@ int main() {
         drawText(font, "Keyboard: H  X  Y  Z   |   R: reset   |   D: demo", 28, 689, 18, muted);
         drawText(font, TextFormat("Completed gates: %d", completedGates), 28, 724, 17, muted);
 
-        // Control panel.
+     
         DrawRectangle(kPanelX, 0, kWindowW - kPanelX, kWindowH,
                       {231, 238, 247, 255});
         DrawLine(kPanelX, 0, kPanelX, kWindowH, {204, 216, 231, 255});
